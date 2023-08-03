@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="warehouse_report_template_inherit" inherit_id="stock.report_delivery_document">
+
+        <xpath expr="//table[last()]" position="after">
+            <div style="margin-top:90%" class="mt32 ml64 mr4">
+
+                <strong style="margin-right:15%;margin-left:5%">________________________</strong>
+                <strong style="margin-right:15%">_______________________</strong>
+                <strong>_______________________</strong>
+            </div>
+
+
+        </xpath>
+
+
+    </template>
+
+
+</odoo>

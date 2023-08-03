@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding='UTF-8'?>
+<odoo>
+
+    <record id="account_delivery_invoice" model="ir.actions.report">
+        <field name="name">Purchase Invoice</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-html</field>
+        <field name="report_name">flour_invoice.report_delivery_invoice</field>
+        <field name="report_file">flour_invoice.report_delivery_invoice</field>
+        <field name="print_report_name">(object._get_report_base_filename())</field>
+        <field name="attachment">(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')</field>
+        <field name="binding_model_id" ref="model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_delivery_invoice">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="o.partner_id.lang"/>
+                <t t-call="flour_invoice.report_delivery_invoice_document" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_delivery_invoice_document">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <!--            <h2>-->
+                <!--                <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'">Invoice</span>-->
+                <!--                <span t-if="o.move_type == 'out_invoice' and o.state == 'draft'">Draft Invoice</span>-->
+                <!--                <span t-if="o.move_type == 'out_invoice' and o.state == 'cancel'">Cancelled Invoice</span>-->
+                <!--                <span t-if="o.move_type == 'out_refund'">Credit Note</span>-->
+                <!--                <span t-if="o.move_type == 'in_refund'">Vendor Credit Note</span>-->
+                <!--                <span t-if="o.move_type == 'in_invoice'">Vendor Bill</span>-->
+                <!--                <span t-if="o.name != '/'" t-field="o.name"/>-->
+                <!--            </h2>-->
+
+                <div class="d-flex" style="width:100%;margin-bottom:5%;margin-top:5%">
+                    <div style="text-align:left;width:50%">
+                        <span style="font-weight: bold;">Bill No :</span>
+                        <span t-field="o.name"/>
+                        <br/>
+                        <span style="font-weight: bold;">Date :</span>
+                        <span t-field="o.invoice_date"/>
+                        <br/>
+                        <!--                    <span style="font-weight: bold;">Account ID:</span>-->
+                        <!--                    <span t-field="o.partner_id.code"-->
+                        <!--                          />-->
+                        <!--                    <br/>-->
+                        <span style="font-weight: bold;">PartyName :</span>
+                        <span t-field="o.partner_id.name"/>
+
+                    </div>
+
+                </div>
+                <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
+
+                <table class="table table-sm o_main_table" name="invoice_line_table">
+                    <thead>
+                        <tr>
+                            <th name="th_description" class="text-left">
+                                <span>Name</span>
+                            </th>
+                            <th name="th_description" class="text-left">
+                                <span>GRN#</span>
+                            </th>
+                            <th name="th_batch" class="text-left">
+                                <span>Vehicle #</span>
+                            </th>
+                            <th name="th_description" class="text-left">
+                                <span>Un-Location</span>
+                            </th>
+                            <th name="th_expiry" class="text-left">
+                                <span>Bags</span>
+                            </th>
+                            <th name="th_bonus" class="text-left">
+                                <span>GW(Kg)</span>
+                            </th>
+
+                            <th name="th_quantity" class="text-left">
+                                <span>T-Deduction</span>
+                            </th>
+                            <th name="th_quantity" class="text-left">
+                                <span>A-Deduction</span>
+                            </th>
+                            <th name="th_quantity" class="text-left">
+                                <span>NW(Kg)</span>
+                            </th>
+                            <th name="th_quantity" class="text-left">
+                                <span>Rate/40</span>
+                            </th>
+
+                            <th name="th_subtotal" class="text-left">
+                                <span groups="account.group_show_line_subtotals_tax_excluded">Amount (Rs)</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <!--                <tbody class="invoice_tbody">-->
+                    <!--                    &lt;!&ndash;                        <t t-set="current_subtotal" t-value="0"/>&ndash;&gt;-->
+                    <!--                    &lt;!&ndash;                        <t t-set="manufacturer_total" t-value="0"/>&ndash;&gt;-->
+                    <!--                    &lt;!&ndash;                        <t t-set="manufacturer_count" t-value="-1"/>&ndash;&gt;-->
+                    <!--                    &lt;!&ndash;                        <t t-set="lines"&ndash;&gt;-->
+                    <!--                    &lt;!&ndash;                           t-value="o.invoice_line_ids.sorted(key=lambda p: p.product_id.manufacturer.id)"/>&ndash;&gt;-->
+                    <t t-set="seq" t-value="1"/>
+                    <t t-foreach="data['invoice_line']" t-as="line">
+                        <t t-foreach="data['invoice_line'][line]" t-as="test">
+
+                            <tr t-att-class="'bg-200 o_line_section'">
+                                <t>
+                                    <td>
+                                        <span t-esc="data['invoice_line'][line][test][0]"/>
+                                    </td>
+
+                                    <td>
+                                        <span t-esc="data['invoice_line'][line][test][2]"/>
+                                    </td>
+
+                                    <td>
+                                        <t t-esc="data['invoice_line'][line][test][1]"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="data['invoice_line'][line][test][3]"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="data['invoice_line'][line][test][10]"/>
+                                    </td>
+
+                                    <td>
+                                        <t t-esc="data['invoice_line'][line][test][4]"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="data['invoice_line'][line][test][6]"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="data['invoice_line'][line][test][7]"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="data['invoice_line'][line][test][5]"/>
+                                    </td>
+
+                                    <td>
+                                        <span t-esc="data['invoice_line'][line][test][8]"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="data['invoice_line'][line][test][9]"/>
+                                    </td>
+
+                                </t>
+                            </tr>
+                            <t t-if="data['total_lines'] == seq">
+                                <tr>
+
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>
+<!--                                        <span>Helllllllllllllllllllllllllo</span>-->
+                                        <span t-esc="data['total_gross']"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="data['tare_total']"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="data['addi_total']"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="data['total_net']"/>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span style="font-weight: bold;">Total :</span>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>
+                                        <span t-esc="'{:,}'.format(o.amount_total)" style="font-weight: bold;"/>
+                                    </td>
+
+                                </tr>
+                            </t>
+                            <t t-set="seq" t-value="seq + 1"/>
+                        </t>
+                    </t>
+                </table>
+
+
+<!--                <div class="d-flex">-->
+<!--                    <span style="width:45%">-->
+<!--                        <span></span>-->
+<!--                    </span>-->
+<!--                    <div style="width:60%">-->
+<!--                    <span style="margin-left:5%" t-esc="data['total_gross']"/>-->
+<!--                    <span style="margin-left:5.5%" t-esc="data['tare_total']"/>-->
+<!--                    <span style="margin-left:15%" t-esc="data['addi_total']"/>-->
+<!--                    <span style="margin-left:17%"  t-esc="data['total_net']"/>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+                            <div>
+
+
+                            </div>
+                <!--                <span style="margin-left:30%">Total</span>-->
+                <!--                                        <span style="margin-left:12%" t-esc="data['total_gross']"/>-->
+                <!--                                        <span style="margin-left:8%" t-esc="data['tare_total']"/>-->
+                <!--                                        <span style="margin-left:7%" t-esc="data['tare_total']"/>-->
+                <!--                                        <span style="margin-left:10%" t-esc="data['total_net']"/>-->
+                <!--                                        <span style="margin-left:10%" t-esc="data['total']"/>-->
+
+                <!--                    <table class="table table-sm o_main_table">-->
+
+                <!--                                <thead>-->
+                <!--                                    <tr>-->
+                <!--                                        <th name="th_description" class="text-left">-->
+                <!--                                             <span t-esc="data['total_gross']"/>-->
+                <!--                                        </th>-->
+                <!--                                        <th name="th_description" class="text-left">-->
+                <!--                                           <span t-esc="data['total_gross']"/>-->
+                <!--                                        </th>-->
+                <!--                                    </tr>-->
+                <!--                                </thead>-->
+
+                <!--                    </table>-->
+                <!--                </div>-->
+                <!--            <div style="margin-left:84%;margin-top:20px">-->
+                <!--                <span>Unloading Charges :</span>-->
+                <!--                <span>0.0</span>-->
+                <!--                <br/>-->
+                <!--                <span>Freight Inward:</span>-->
+                <!--                <span>0.0</span>-->
+                <!--                <br/>-->
+                <!--                <span>With holding Tax :</span>-->
+                <!--                <span>0.0</span>-->
+                <!--                <br/>-->
+
+
+                <!--            </div>-->
+<!--                <div style="margin-top:20px; font-weight: bold;">-->
+<!--                    <span>Total :</span>-->
+<!--                    <span t-esc="'{:,}'.format(o.amount_total)" style="margin-left:88.5%;margin-top:20px"/>-->
+<!--                </div>-->
+                <div class="d-flex" style="margin:40px;font-weight: bold; ">
+                    <div style="width:30%">Prepared By
+                        <div style="width:30%; padding-top:20px">___________</div>
+                    </div>
+                    <div style="width:30%">Checked By
+                        <div style="width:30%;padding-top:20px">___________</div>
+                    </div>
+                    <div style="width:30%">Approved By
+                        <div style="width:30%; padding-top:20px">___________</div>
+                    </div>
+
+                </div>
+                <hr class="solid"/>
+
+
+            </div>
+        </t>
+    </template>
+
+</odoo>

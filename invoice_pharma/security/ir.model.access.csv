@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_invoice_pharma_invoice_pharma,invoice_pharma.invoice_pharma,model_invoice_pharma_invoice_pharma,base.group_user,1,1,1,1

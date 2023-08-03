@@ -1,0 +1,31 @@
+<odoo>
+
+  <record model="ir.ui.view" id="res_partner_form_view_pharma_type_field">
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+              <field name="pharma_type"/>
+            </xpath>
+        </field>
+    </record>
+
+   <record id="sale_order_view_form_inherit_invoice_pharma" model="ir.ui.view">
+        <field name="name">sale.order.form.invoice.pharma</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="coupon_ids"/>
+            </xpath>
+        </field>
+    </record>
+
+
+
+
+
+
+
+
+</odoo>
